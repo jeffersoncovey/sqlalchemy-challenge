@@ -44,9 +44,9 @@ def welcome():
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
         f"/api/v1.0/start<br/>"
-        f"-Replace start with (YYYY-MM-DD), returns MIN, AVG, and MAX from that date onward.<br/>"
+        f"-Replace start with YYYY-MM-DD, returns MIN, AVG, and MAX for temperature from that date onward.<br/>"
         f"/api/v1.0/start/end<br/>"
-        f"-Replace start/end with (YYYY-MM-DD)"
+        f"-Replace start/end with YYYY-MM-DD/YYYY-MM-DD, returns MIN, AVG, and MAX for temperatures between the date range."
     )
 
 # Convert the query results to a dictionary using date as the key and prcp as the value.
@@ -109,6 +109,15 @@ def start(start):
         filter(Measurement.date >= start_date).all()
     session.close()  
     return jsonify(start_data)
+
+@app.route("/api/v1.0/<start>/<end>")
+def start_end(start,end):
+    start_date = dt.datetime.strptime(start, '%Y-%m-%d')
+    end_date = dt.datetime.strptime(end, '%Y-%m-%d')
+    start_data = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
+        filter(Measurement.date >= start_date).filter(Measurement.date <= end_date).all()
+    session.close()  
+    return jsonify(start_data)    
 
 
 
