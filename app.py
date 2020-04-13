@@ -44,7 +44,7 @@ def welcome():
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
         f"/api/v1.0/start<br/>"
-        f"-Replace start with (YYYY-MM-DD)<br/>"
+        f"-Replace start with (YYYY-MM-DD), returns MIN, AVG, and MAX from that date onward.<br/>"
         f"/api/v1.0/start/end<br/>"
         f"-Replace start/end with (YYYY-MM-DD)"
     )
@@ -105,8 +105,10 @@ def tobs():
 @app.route("/api/v1.0/<start>")
 def start(start):
     start_date = dt.datetime.strptime(start, '%Y-%m-%d')
-    start_data = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measuremens.tobs)).\
-        filter(Measurement.date >= start_date)
+    start_data = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
+        filter(Measurement.date >= start_date).all()
+    session.close()  
+    return jsonify(start_data)
 
 
 
